@@ -2,13 +2,17 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use MongoDB\Laravel\Eloquent\Model as Eloquent;
 
-class FileUpload extends Model
+class FileUpload extends Eloquent
 {
-    protected $connection = 'mongodb'; // Define a conexão com MongoDB
-    protected $collection = 'uploads'; // Nome da coleção no banco
+    // Define a conexão com MongoDB
+    protected $connection = 'mongodb'; 
 
+    // Nome da coleção no banco
+    protected $collection = 'uploads'; 
+
+    // Campos que podem ser preenchidos
     protected $fillable = [
         'filename',
         'uploaded_at',
