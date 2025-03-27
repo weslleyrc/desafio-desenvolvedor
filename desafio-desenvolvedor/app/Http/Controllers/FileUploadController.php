@@ -17,16 +17,19 @@ class FileUploadController extends Controller
 
    public function upload(Request $request)
    {
-    dd('mamae');
+    //dd($request->file('file')->getMimeType());
     // Validação do Arquivo
+    $file = $request->file('file');
+
+    dd($request->file('file')->getMimeType());
+
     $validator = Validator::make($request->all(), [
-        'file' => 'required|mimes:csv,xlsx|max:51200'
+        'file' => 'required|mimes:csv,txt,text/plain,text/csv|max:1024000'
     ]);
 
     if ($validator->fails()){
         return response()->json(['error' => $validator->errors()], 400);
     }
-
     //chama o metodo de upload
     $result = $this->fileUploadService->uploadFile($request->file('file'));
 
@@ -36,6 +39,7 @@ class FileUploadController extends Controller
     }
 
      // Retorna a resposta de sucesso com mais informações, como o nome do arquivo
+     dd('papai');
      return response()->json([
         'message' => 'Upload realizado com sucesso!', 
         'data' => [
