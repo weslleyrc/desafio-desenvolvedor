@@ -18,6 +18,8 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
+
+     //esse cara aqui é o gatilho para reconhecer a rota API, essa desgrama não estava reconhecendo sozinho
     public function boot(): void
     {
         Route::middleware('api')

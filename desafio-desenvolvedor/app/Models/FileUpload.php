@@ -6,16 +6,16 @@ use MongoDB\Laravel\Eloquent\Model as Eloquent;
 
 class FileUpload extends Eloquent
 {
-    // Define a conexão com MongoDB
+    // Conecta com MongoDB(Z)
     protected $connection = 'mongodb'; 
 
     // Nome da coleção no banco
     protected $collection = 'uploads'; 
 
-    // Campos que podem ser preenchidos
+    // Informaçoes para o banco
     protected $fillable = [
         'filename',
         'uploaded_at',
-        'content'
+        'file_id',
     ];
 }
