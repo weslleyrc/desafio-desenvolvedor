@@ -23,10 +23,5 @@ class Kernel extends HttpKernel
         'api' => [
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
-    ];
-
-   /* protected $routeMiddleware = [
-        'admin' => \App\Http\Middleware\AdminMiddleware::class,
-    ];*/
-    
+    ];    
 }

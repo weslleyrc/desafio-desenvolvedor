@@ -17,4 +17,19 @@ class FileUploadRepository
         // Armazena os dados no MongoDB(z)
         return FileUpload::create($data);
     }
+
+    public function searchFileContent($tckrSymb = null, $rptDt = null, $page = 1, $perPage = 10)
+    {
+        $query = FileUpload::query();
+
+        if($tckrSymb){
+            $query->where('content.TckrSymb', $tckrSymb);
+        }
+
+        if($rptDt){
+            $query->where('content.RptDt', $rptDt);
+        }
+
+        return $query->paginate($perPage, ['*'], 'page', $page);
+    }
 }

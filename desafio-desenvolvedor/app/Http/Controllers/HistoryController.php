@@ -16,7 +16,7 @@ class HistoryController extends Controller
             'uploaded_at' => 'nullable|date_format:Y-m-d',//data do arquivo
         ]);
 
-        //se a validação valhar ele chama o bad request
+        //se a validação valhar ele chama o bad request (bad romanceeeee)
         if($validator->fails()){
             return response()->json(['error' => $validator->errors()]. 400);
         }
