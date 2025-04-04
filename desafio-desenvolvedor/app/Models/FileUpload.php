@@ -13,9 +13,5 @@ class FileUpload extends Eloquent
     protected $collection = 'uploads'; 
 
     // Informaçoes para o banco
-    protected $fillable = [
-        'filename',
-        'uploaded_at',
-        'file_id',
-    ];
+    protected $guarded = [];
 }

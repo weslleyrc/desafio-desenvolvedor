@@ -13,4 +13,4 @@ Route::post('/upload', [FileUploadController::class, 'upload']);
 Route::get('/upload/history', [HistoryController::class, 'gethistory']);
 
 //Definindo a rota para a busca de parametros
-Route::get('/file/search', [FileContentController::class, 'searchContent']);
+Route::get('/upload/search', [FileContentController::class, 'searchContent']);

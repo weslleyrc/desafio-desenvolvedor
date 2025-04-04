@@ -14,6 +14,8 @@ class HistoryController extends Controller
         $validator = Validator::make($request->all(),[
             'filename' => 'nullable|string', //nome do arquivo
             'uploaded_at' => 'nullable|date_format:Y-m-d',//data do arquivo
+            'page' => 'nullable|integer|min:1',
+            'per_page' => 'nullable|integer|min:1|max:100'
         ]);
 
         //se a validação valhar ele chama o bad request (bad romanceeeee)
@@ -22,15 +24,19 @@ class HistoryController extends Controller
         }
 
         // Busca os arquivos no histórico (procurando nemo!)
-        $query = FileUpload::query();
+        $query = FileUpload::select('filename', 'uploaded_at');
 
         //Se positivo vai adicionar ao filtro
-        if($request->has('uploaded_at')){
-            $query->whereDate('uploaded_at', '=', $request->input('uploaded_at'));
+        if($request->filled('filename')){
+            $query->where('filename', 'like', '%' . $request->input('filename') . '%');
         }
 
         //Realizando a query e retornando o resultado (aleluia senhor!!!)
-        $uploads = $query->get();
+        $perPage = $request->input('per_page', 10);
+        $page = $request->input('page', 1);
+
+        $uploads = $query->orderBy('uploaded_at', 'desc')
+                         ->paginate($perPage, ['*'], 'page', $page);
 
         //Se não encontrar nenhum upload chama o 404 (tem ninguem em casa!!)
         if($uploads->isEmpty()){

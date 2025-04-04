@@ -31,7 +31,7 @@ class FileContentController extends Controller
 
         return response()->json([
             'message' => 'Resultados encontrados',
-            'data' => $result
+            'data' => $result->items(), // se estiver paginando
         ]);
 
     }
