@@ -19,7 +19,7 @@ class FileUploadService
         $file = $request->file('file');
         $filename = $file->getClientOriginalName();
         
-        // Verifica se o arquivo já foi enviado antes
+        // Verifica se o arquivo já existe no dbz
         if (FileUpload::where('filename', $filename)->exists()) {
             return response()->json(['error' => 'Arquivo já enviado anteriormente.'], 400);
         }
@@ -30,18 +30,10 @@ class FileUploadService
         }
     
         // Processa o arquivo e retorna os dados como array de documentos
-        $data = $this->processFile($file, $extension);
-    
-        if (!$data) {
+        $success = $this->processFile($file, $extension);
+
+        if (!$success) {
             return response()->json(['error' => 'Erro ao processar o arquivo.'], 500);
-        }
-    
-        // Insere os documentos em lotes no MongoDB (batch insert)
-        $batchSize = 1000; // Define o tamanho do lote
-        $batches = array_chunk($data, $batchSize);
-        
-        foreach ($batches as $batch) {
-            FileUpload::insert($batch);
         }
     
         return response()->json(['message' => 'Upload realizado com sucesso!'], 201);
@@ -66,45 +58,58 @@ class FileUploadService
     {
         $filename = $file->getClientOriginalName();
         $uploadedAt = now();
-    
-        // Lê o conteúdo original do arquivo
+
+         // Lê o conteúdo original
         $content = file_get_contents($file->getRealPath());
-    
+
         // Converte para UTF-8
         $content = mb_convert_encoding($content, 'UTF-8', 'auto');
-    
-        // Quebra o conteúdo por linha
+
+        // Quebra por linhas
         $lines = preg_split("/\r\n|\n|\r/", $content);
-    
-        // Verifica se a primeira linha contém "Status do Arquivo"
+
+        // Remove a linha extra com "Status do Arquivo", se necessário
         if (isset($lines[0]) && str_contains($lines[0], 'Status do Arquivo')) {
-            array_shift($lines); // Remove a primeira linha
+            array_shift($lines); // remove a primeira linha
         }
-    
+
         // Remove linhas vazias
         $lines = array_filter($lines, fn($line) => trim($line) !== '');
-    
-        // Junta novamente
+
+        // Junta de novo
         $content = implode(PHP_EOL, $lines);
-    
-        // Salva em um arquivo temporário
+
+        // Salva em arquivo temporário
         $tmpPath = storage_path('app/tmp_upload.csv');
         file_put_contents($tmpPath, $content);
-    
-        // Agora lê com o League\Csv
+
+        // Lê com League\Csv
         $csv = Reader::createFromPath($tmpPath, 'r');
-        $csv->setDelimiter(";"); // Delimitador correto
-        $csv->setHeaderOffset(0); // Primeira linha como cabeçalho
-    
-        // Adiciona os campos extras em cada registro
+        $csv->setDelimiter(";");
+
+        // Agora sim, define a primeira linha REAL como cabeçalho
+        $csv->setHeaderOffset(0);
+
         $records = [];
+
         foreach ($csv->getRecords() as $record) {
             $record['filename'] = $filename;
             $record['uploaded_at'] = $uploadedAt;
             $records[] = $record;
+
+            // Insere por lote a cada 1000 registros
+            if (count($records) >= 1000) {
+                FileUpload::insert($records);
+                $records = [];
+            }
         }
-    
-        return $records;
+
+        // Insere o que restar
+        if (count($records) > 0) {
+            FileUpload::insert($records);
+        }
+
+        return true;
     }
 
     private function processExcel($file)
