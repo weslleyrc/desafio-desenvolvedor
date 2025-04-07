@@ -23,7 +23,8 @@ class FileUploadService
         if (FileUpload::where('filename', $filename)->exists()) {
             return response()->json(['error' => 'Arquivo já enviado anteriormente.'], 400);
         }
-    
+
+        //Verifica a extensão do arquivo
         $extension = $file->getClientOriginalExtension();
         if (!in_array($extension, ['csv', 'xlsx'])) {
             return response()->json(['error' => 'Formato de arquivo não suportado.'], 400);
@@ -119,8 +120,17 @@ class FileUploadService
             return null;
         }
     
-        $header = array_shift($data[0]); // Primeira linha como cabeçalho
+        //Remove a linha extra "Status do Arquivo"
+
+        if(isset($data[0][0]) && str_contains($data[0][0][0], 'Status do Arquivo')){
+            array_shift($data[0]);
+        }
+
+        $header = array_shift($data[0]);
         $records = [];
+
+        $filename = $file->getClientOriginalName();
+        $uploadedAt = now();
     
         foreach ($data[0] as $row) {
             $document = array_combine($header, $row);
@@ -133,8 +143,19 @@ class FileUploadService
             $document['uploaded_at'] = now();
     
             $records[] = $document;
+
+            //inserir por lote a cada 1000 registros
+            if(count($records) >= 1000){
+                FileUpload::insert($records);
+                $records;
+            }
+        
         }
-    
+        //verifica se há registros
+        if (count($records) > 0 ) {
+            FileUpload::insert($records);
+        }
+
         return $records;
     }
 }

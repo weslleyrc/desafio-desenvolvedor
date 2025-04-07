@@ -12,6 +12,6 @@ class FileUpload extends Eloquent
     // Nome da coleção no banco
     protected $collection = 'uploads'; 
 
-    // Informaçoes para o banco
+    // Como enviarei as informaçoes para o dbz
     protected $guarded = [];
 }

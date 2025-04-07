@@ -16,19 +16,20 @@ class FileContentController extends Controller
 
     public function searchContent(Request $request)
     {
-        $tckrSymb = $request->query('TckrSymb'); //1 parametro de busca
-        $rptDt = $request->query('RptDt'); //2 parametro de busca
+        $tckrSymb = $request->query('TckrSymb'); //Código do ativo
+        $rptDt = $request->query('RptDt'); //Data do ativo
 
-        $page = $request->query('page', 1);
-        $perPage = $request->query('per_page', 10);
+        $page = $request->query('page', 1); //Pagina que vai iniciar
+        $perPage = $request->query('per_page', 10);//itens por pagina
 
-        $result = $this->fileUploadRepository->searchFileContent($tckrSymb, $rptDt, $page, $perPage);
+        $result = $this->fileUploadRepository->searchFileContent($tckrSymb, $rptDt, $page, $perPage); //O cara que vai no banco buscar as info
 
-
+        //Se nao encontrar nada, retorna com 404 (NINGUEM EM CASA kkk)
         if($result->isEmpty()){
             return response()->json(['message' => 'Nenhum conteúdo encontrado.'], 404);
         }
 
+        //Se encontrar retorna com um JSON bonitão
         return response()->json([
             'message' => 'Resultados encontrados',
             'data' => $result->items(), // se estiver paginando
